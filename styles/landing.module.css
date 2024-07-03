@@ -1,0 +1,32 @@
+.page {
+    overflow-y: auto;
+
+}
+
+.loginSection {
+    position: relative; /* Ensure the pseudo-element is positioned relative to the .loginSection */
+    height: 100vh;
+    padding: 40px 0;
+    background: #f0f2f5;
+    overflow: hidden; /* Prevent content from spilling out of the section */
+}
+
+.loginSection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/coconut-1501334_1920.jpg');
+    background-size: cover; /* Ensure the background covers the entire area */
+    background-position: center; /* Center the background image */
+    filter: blur(10px); /* Apply the blur effect */
+    opacity: 0.2;
+}
+
+
+
+.baseLine {
+
+}

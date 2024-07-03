@@ -1,0 +1,19 @@
+@keyframes gradient-animation {
+    0% {
+        fill: url(#gradient1);
+    }
+
+    50% {
+        fill: url(#gradient2);
+    }
+
+    100% {
+        fill: url(#gradient1);
+    }
+}
+
+.glitter {
+    fill: none;
+    stroke-width: 2;
+    animation: gradient-animation 5s infinite;
+}
