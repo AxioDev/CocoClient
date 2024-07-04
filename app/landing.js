@@ -41,6 +41,9 @@ export default function LandingPage() {
                     <Paragraph style={{ color: '#666' }}>
                         Discutez en live sur le premier site de chat gratuit de France avec des milliers de connectés. Tout est instantané et direct : salons publics, rooms privés ou messages privés. Coco n'est pas seulement un tchat mais aussi un réseau social où vous pouvez retrouver vos amis, multiplier les rencontres et développer votre réseau de connaissances. Coco est un forum de discussion sympa.
                     </Paragraph>
+                    <Paragraph style={{ color: '#333' }}>
+                        coco est le premier chat gratuit de France : tchater et voir des webcam . le chat sans inscription pour discuter avec des milliers de connectés.
+                    </Paragraph>
                     <Image src={Illu1} alt="Coco Platform" sizes="100vw" style={{
                         objectFit: 'cover',
                         width: '100%',

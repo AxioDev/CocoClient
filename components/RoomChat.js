@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Input, Button, List, Typography, Col, Row, Avatar, Upload, message, Form } from 'antd';
-import { UploadOutlined, UserOutlined } from '@ant-design/icons';
+import { Input, Button, List, Typography, Col, Row, Avatar, Upload, message, Form, Layout, Image, Tag, Space } from 'antd';
+import { UploadOutlined, UserOutlined, UpOutlined, DownOutlined, EyeOutlined, SendOutlined } from '@ant-design/icons';
 import { useUser } from '@/contexts/UserContext';
 import { uploadFile } from '../api/upload';
 import { useSocket } from '@/contexts/SocketContext';
-import Image from 'next/image';
+import Styles from '@/styles/roomChat.module.css';
+import { useMediaQuery } from 'react-responsive';
 
+const { Content } = Layout;
 const { TextArea } = Input;
 
 const RoomChat = ({ room }) => {
@@ -16,6 +18,8 @@ const RoomChat = ({ room }) => {
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
     const [users, setUsers] = useState([]);
+    const isMobile = useMediaQuery({ maxWidth: 767 });
+    const [usersListCollapsed, setUsersListCollapsed] = useState(false);
 
     useEffect(() => {
         socket.emit('joinRoom', { userId: user._id, roomId: room._id });
@@ -118,89 +122,138 @@ const RoomChat = ({ room }) => {
         socket.emit('slashCommand', { command, roomId: room._id, userId: user._id });
     };
 
+    const canSendMessage = () => {
+        return newMessage.trim();
+    }
+
+    const handleCollapseUsersList = () => {
+        setUsersListCollapsed(!usersListCollapsed);
+    }
+
     return (
-        <Row style={{ height: '100%', overflow: 'hidden' }}>
-            <Col span={18} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <div ref={messagesContainerRef} style={{ flex: 1, overflowY: 'auto', maxHeight: '500px', padding: '20px', backgroundColor: '#fff' }}>
-                    <List
-                        bordered={false}
-                        itemLayout="horizontal"
-                        locale={{ emptyText: 'Aucun message' }}
-                        dataSource={messages}
-                        renderItem={(message, index) => (
-                            <List.Item key={index} style={{ textAlign: message.sender._id === user._id ? 'right' : 'left' }}>
-                                <List.Item.Meta
-                                    title={<Typography.Text strong>{message.sender.nickname}</Typography.Text>}
-                                    description={
-                                        <div>
-                                            {message.content && (
-                                                <div style={{
-                                                    backgroundColor: message.sender._id === user._id ? '#dcf8c6' : '#d9d9d9',
-                                                    padding: '8px 16px',
-                                                    borderRadius: '20px',
-                                                    display: 'inline-block',
-                                                    maxWidth: '80%',
-                                                    wordBreak: 'break-word'
-                                                }}>
-                                                    {message.content}
-                                                </div>
-                                            )}
-                                            {message.file && (
-                                                <div>
-                                                    <a href={message.file} target="_blank" rel="noopener noreferrer">
-                                                        <Image src={message.file} alt="file" width={200} height={200} style={{ maxWidth: '200px', maxHeight: '200px' }} />
-                                                    </a>
-                                                </div>
-                                            )}
-                                        </div>
-                                    }
-                                />
-                            </List.Item>
-                        )}
-                    />
-                    <div ref={messagesEndRef} />
-                </div>
-                <div style={{ borderTop: '1px solid #f0f0f0', padding: '10px', backgroundColor: '#fff' }}>
-                    <Form layout="inline" style={{ display: 'flex', alignItems: 'center' }}>
-                        <Form.Item style={{ marginRight: '10px' }}>
-                            <Upload {...uploadProps} showUploadList={false}>
-                                <Button icon={<UploadOutlined />}>Fichier</Button>
-                            </Upload>
-                        </Form.Item>
-                        <Form.Item style={{ flex: 1, marginRight: '10px' }}>
-                            <TextArea
-                                value={newMessage}
-                                onChange={handleInputChange}
-                                onPressEnter={handleKeyPress}
-                                rows={1}
-                                autoSize={{ minRows: 1, maxRows: 3 }}
-                                placeholder="Tapez votre message..."
-                            />
-                        </Form.Item>
-                        <Form.Item>
-                            <Button type="primary" onClick={() => handleSendMessage()}>
-                                Envoyer
-                            </Button>
-                        </Form.Item>
-                    </Form>
-                </div>
-            </Col>
-            <Col span={6} style={{ padding: '0 20px', borderLeft: '1px solid #f0f0f0', maxHeight: '500px', overflowY: 'auto' }}>
-                <List
-                    header={<div style={{ fontWeight: 'bold' }}>Utilisateurs</div>}
-                    itemLayout="horizontal"
-                    dataSource={users}
-                    renderItem={(user) => (
-                        <List.Item>
-                            <List.Item.Meta
-                                avatar={<Avatar icon={<UserOutlined />} />}
-                                title={user.nickname}
-                            />
-                        </List.Item>
-                    )}
-                />
-            </Col>
-        </Row>
+        <>
+            <div style={{ overflowY: 'auto', position: 'relative', flexGrow: 1 }}>
+                <Content style={{ padding: '0 0', overflowY: 'auto', position: 'relative', flexGrow: 1 }}>
+                    <Row>
+                        <Col
+                            lg={18}
+                            xs={24}
+                            style={{}}
+                            order={isMobile ? 2 : 1}
+                        >
+                            <div style={{ maxHeight: isMobile ? 'calc(100vh - 306px)' : 'calc(100vh - 174px)', overflowY: 'auto', padding: '16px' }} ref={messagesContainerRef}>
+                                {messages.length === 0 && (
+                                    <div style={{ textAlign: 'center', color: 'gray' }}>
+                                        Pas de message pour le moment, envoyez un message pour commencer la conversation.
+                                    </div>
+                                )}
+                                {messages.map((message, index) => (
+                                    <div key={index} style={{
+                                        padding: '4px 16px',
+                                        borderRadius: '2px',
+                                        maxWidth: '80%',
+                                        wordBreak: 'break-word',
+                                    }}>
+                                        <strong style={{ color: message.sender === 'Me' ? 'green' : 'black' }}>
+                                            {message.sender?.nickname || 'Inconnu'}:&nbsp;
+                                        </strong>
+                                        {message.content && (
+                                            <span>
+                                                {message.content}
+                                            </span>
+                                        )}
+                                        {message.file && (
+                                            <div>
+                                                <Image
+                                                    src={message.file}
+                                                    alt="file"
+                                                    style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '4px', cursor: 'pointer' }}
+                                                    preview={{ mask: <Button icon={<EyeOutlined />} type="primary" shape="circle" size="large" /> }} />
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                        </Col>
+                        <Col
+                            lg={6}
+                            xs={24}
+                            style={{
+                                borderLeft: '1px solid #f0f0f0',
+                                backgroundColor: '#f9f9f9',
+                                borderBottom: isMobile ? '1px solid #f0f0f0' : 'none',
+                                height: isMobile ? 'auto' : 'calc(100vh - 64px)',
+                            }}
+                            order={isMobile ? 1 : 2}
+                        >
+                            {usersListCollapsed || !isMobile ?
+                                <List
+                                    size='small'
+                                    bordered={false}
+                                    header={<div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+
+                                    }}>
+                                        <Typography.Text strong>Utilisateurs</Typography.Text>
+                                        <Tag style={{ marginLeft: '10px' }}>{users.length}</Tag>
+                                    </div>}
+
+                                    style={{ padding: '0px 8px', paddingBottom: '8px' }}
+                                    dataSource={users}
+                                    renderItem={(item) => (
+                                        <List.Item className={`${Styles.userItem} ${user.gender == 'man' ? Styles.userItemMan : Styles.userItemWoman}`}>
+                                            <strong>{item.nickname}</strong>
+                                            <span>{item.age}</span>
+                                            <em>{item.city.name}</em>
+                                        </List.Item>
+                                    )}
+                                /> : null}
+
+                            {isMobile ? <div style={{
+                                padding: '10px',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                backgroundColor: 'rgb(240, 240, 240)',
+                                gap: '8px',
+                            }}
+                                onClick={handleCollapseUsersList}>
+                                {!usersListCollapsed ? <DownOutlined /> :
+                                    <UpOutlined />}
+                                    <span>
+                                        Voir les utilisateurs
+                                    </span>
+                            </div> : null}
+                        </Col>
+                    </Row>
+                </Content>
+            </div>
+            <div style={{ padding: '10px 10px 10px 10px', position: 'absolute', bottom: 0, width: '100%', background: '#f1f1f1', paddingRight: isMobile ? '10px' : '0' }}>
+
+                <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                    <Space.Compact style={{ width: '100%' }} size='large'>
+                        <Upload {...uploadProps} showUploadList={false}>
+                            <Button icon={<UploadOutlined />} />
+                        </Upload>
+                        {/* <Button icon={<CameraOutlined />} onClick={() => message.info('Cette fonctionnalité n\'est pas encore disponible')} /> */}
+                        <Input
+                            size='large'
+                            value={newMessage}
+                            onChange={handleInputChange}
+                            onPressEnter={handleKeyPress}
+                            rows={1}
+                            autoSize={{ minRows: 1, maxRows: 1 }}
+                            placeholder="Tapez votre message..."
+                        />
+                        <Button type="primary" onClick={() => handleSendMessage()} disabled={!canSendMessage()} icon={<SendOutlined />} />
+                    </Space.Compact>
+                </Space>
+
+
+            </div>
+        </>
     );
 };
 

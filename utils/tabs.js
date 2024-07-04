@@ -11,5 +11,18 @@ export const createNewTab = (key, label, content, handleTabClose) => ({
             <CloseOutlined onClick={(e) => handleTabClose(e, key)} style={{ cursor: 'pointer' }} />
         </Space>
     ),
-    children: content
+    children: content,
+    handleTabClose,
+});
+
+
+export const updateTab = (tab, label) => ({
+    ...tab,
+    label: (
+        <Space>
+            {label}
+            <CloseOutlined onClick={(e) => tab.handleTabClose(e, tab.key)} style={{ cursor: 'pointer' }} />
+        </Space>
+    ),
+
 });

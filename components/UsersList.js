@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Badge, List, Avatar, Space, Radio, Divider, Dropdown, Button, Tag, Row, Col, Spin } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
+import { Badge, List, Avatar, Space, Radio, Divider, Dropdown, Button, Tag, Row, Col, Spin, Skeleton, Flex } from 'antd';
+import { DownOutlined, ManOutlined, WomanOutlined } from '@ant-design/icons';
 import { genders, ageFilters } from '../utils/common';
 import { useSocket } from '../contexts/SocketContext';
 import { useUser } from '../contexts/UserContext';
 import { useChat } from '../contexts/ChatContext';
+import Styles from '@/styles/usersList.module.css';
 
 const initialFilters = {
     gender: 'all',
@@ -18,12 +19,14 @@ const UsersList = ({ onUserClick }) => {
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [filters, setFilters] = useState(initialFilters);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const handleOnlineUsers = (users) => {
             dispatch({ type: 'SET_ONLINE_USERS', payload: users });
             setUsers(users);
             applyFilters(users);
+            setIsLoading(false);
         };
 
         const handleUserStatusChange = ({ userId, status }) => {
@@ -40,13 +43,13 @@ const UsersList = ({ onUserClick }) => {
             socket.emit('getOnlineUsers');
         }, 1000 * 60);
 
-        socket.on('onlineUsers', handleOnlineUsers);
+        socket.on('getOnlineUsers', handleOnlineUsers);
         socket.on('userStatusChange', handleUserStatusChange);
 
         // Cleanup on unmount
         return () => {
             clearInterval(interval);
-            socket.off('onlineUsers', handleOnlineUsers);
+            socket.off('getOnlineUsers', handleOnlineUsers);
             socket.off('userStatusChange', handleUserStatusChange);
         };
     }, [dispatch, socket]);
@@ -115,71 +118,79 @@ const UsersList = ({ onUserClick }) => {
 
     return (
         <div style={{ padding: '12px' }}>
-            <Row gutter={[4, 8]} justify="space-between" align="middle" wrap>
-                <Col flex="auto">
-                    <Radio.Group defaultValue="all" buttonStyle="solid" onChange={handleGenderChange}>
-                        <Radio.Button key={'all'} value='all'>
-                            Tout
+            <Flex align="middle" justify="space-between">
+
+                <Radio.Group defaultValue="all" buttonStyle="solid"  onChange={handleGenderChange}>
+                    <Radio.Button key={'all'} value='all'>
+                        Tout
+                    </Radio.Button>
+                    {genders.map((gender, idx) => (
+                        <Radio.Button key={idx} value={gender.key}>
+                            {gender.label}
                         </Radio.Button>
-                        {genders.map((gender, idx) => (
-                            <Radio.Button key={idx} value={gender.key}>
-                                {gender.label}
-                            </Radio.Button>
-                        ))}
-                    </Radio.Group>
-                </Col>
+                    ))}
+                </Radio.Group>
 
-                <Col flex="auto">
-                    <Dropdown
-                        menu={{ items: ageMenuItems }}
-                        trigger={['click']}
-                    >
-                        <Button>
-                            Âge: {ageFilters.find(f => f.key === filters.age)?.label ?? 'Tout'} <DownOutlined />
-                        </Button>
-                    </Dropdown>
-                </Col>
-            </Row>
 
-            <Divider style={{ margin: '16px 0' }} />
 
-            <List
-                itemLayout="horizontal"
-                dataSource={filteredUsers}
-                locale={{ emptyText: 'Aucun utilisateur en ligne correspondant à vos critères' }}
-                style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}
-                renderItem={(user, index) => (
-                    <List.Item 
-                        key={index} 
-                        style={{ 
-                            cursor: 'pointer', 
-                            border: '1px solid #ddd',
-                            borderRadius: '4px', 
-                            marginBottom: '8px', 
-                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                            padding: '8px'
-                        }}
-                        onClick={() => onUserClick(user.user)}
-                    >
-                        <List.Item.Meta
-                            avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${user.user.gender === 'man' ? 1 : 0}&options[width]=40&options[height]=40`} style={{ border: '1px solid #dd' }} />}
-                            title={
-                                <Space>
-                                    {user.user.nickname}
-                                    <Tag color={user.user.gender === 'man' ? 'blue' : 'magenta'}>
-                                        {user.user.gender === 'man' ? 'Homme' : 'Femme'}
-                                    </Tag>
-                                </Space>
-                            }
-                            description={
-                                <>
-                                    {user.user.age} ans, <em>{printCity(user.user.city?.name)}</em> ({distanceToKm(user.distance)} km)
-                                </>
-                            }
-                        />
-                    </List.Item>
-                )}
-            />
+                <Dropdown
+                    
+                    menu={{ items: ageMenuItems }}
+                    trigger={['click']}
+                >
+                    <Button>
+                        {ageFilters.find(f => f.key === filters.age)?.label ?? 'Tout'} <DownOutlined />
+                    </Button>
+                </Dropdown>
+
+            </Flex>
+
+            <Divider style={{ margin: '12px 0' }} />
+
+            {isLoading ? (
+                <Skeleton active />
+            ) : (
+                <div className={Styles.onlineUsersWrapper}>
+                    <List
+                        itemLayout="horizontal"
+                        dataSource={filteredUsers}
+                        locale={{ emptyText: 'Aucun utilisateur en ligne correspondant à vos critères' }}
+                        className={Styles.onlineUsers}
+                        renderItem={(user, index) => (
+                            <List.Item
+                                key={index}
+                                className={`${Styles.onlineUser} ${user.user.gender === 'man' ? Styles.onlineUserGenderMan : Styles.onlineUserGenderWoman}`}
+                                onClick={() => onUserClick(user.user)}
+                            >
+                                <List.Item.Meta
+                                    className={Styles.onlineUserMeta}
+                                    avatar={
+                                        <Badge status={user.status === 'online' ? 'success' : 'default'}>
+                                            <Avatar size="large" icon={user.user.gender == 'man' ? <ManOutlined /> : <WomanOutlined />} />
+                                        </Badge>
+                                    }
+                                    title={
+                                        <Space>
+                                            {user.user.nickname}
+                                            <Tag color={user.user.gender === 'man' ? 'blue' : 'magenta'}>
+                                                {user.user.age} ans
+                                            </Tag>
+                                        </Space>
+                                    }
+                                    description={
+                                        <div className={Styles.onlineUserDescription}>
+                                            <em>
+                                                {printCity(user.user.city?.name)}
+                                            </em> 
+                                            ({distanceToKm(user.distance)} km)
+                                        </div>
+                                    }
+                                />
+                            </List.Item>
+                        )}
+                    />
+                </div>
+            )}
         </div>
     );
 };

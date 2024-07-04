@@ -1,8 +1,12 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Spin } from 'antd';
+import { Spin, Typography } from 'antd';
 import { useRouter } from 'next/navigation';
 import { useSocket } from '../contexts/SocketContext';
+import { LoadingOutlined } from '@ant-design/icons';
+import Styles from '@/styles/loading.module.css';
+
+const { Text } = Typography;
 
 const UserContext = createContext(null);
 
@@ -56,8 +60,9 @@ export const UserProvider = ({ children }) => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Spin size="large" />
+      <div className={Styles.loadingScreen}>
+        <Spin size="large" indicator={<LoadingOutlined spin />} />
+        <Text style={{ marginLeft: 10 }}>Chargement...</Text>
       </div>
     );
   }

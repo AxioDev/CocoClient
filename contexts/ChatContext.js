@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useReducer, useContext, useRef } from 'react';
-import { createNewTab } from '../utils/tabs';
+import { createNewTab, updateTab } from '../utils/tabs';
 import PrivateChat from '../components/PrivateChat';
 import HomeTab from '../components/HomeTab';
 import warning from 'antd/es/_util/warning';
@@ -16,7 +16,11 @@ const initialState = {
             children: <HomeTab />
         }
     ],
-    activeTab: 'home'
+    activeTab: 'home',
+    handleTabClose: (e, key) => {
+        e.preventDefault();
+        dispatch({ type: 'REMOVE_TAB', payload: key });
+    }
 };
 
 // Reducer
@@ -33,11 +37,7 @@ const chatReducer = (state, action) => {
                 ...state,
                 tabs: state.tabs.map(tab => {
                     if (tab.key === user._id) {
-
-                        return {
-                            ...tab,
-                            label: <span style={{ color: isTyping ? 'blue' : 'unset' }}>{user.nickname}</span>,
-                        };
+                        return updateTab(tab, <span style={{ color: isTyping ? 'blue' : 'unset' }}>{user.nickname}</span>);
                     }
                     return tab;
                 })

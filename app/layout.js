@@ -14,13 +14,13 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    url: 'https://www.coco',
+    url: 'https://chatcoco.app',
     title: 'Coco - Chat en Ligne Populaire en France',
     description: 'Coco est un site de chat en ligne populaire en France, permettant aux utilisateurs de discuter et de se connecter avec d\'autres sans inscription préalable. Sécurisé, rapide et convivial.',
     site_name: 'Coco',
     images: [
       {
-        url: 'https://www.coco/images/logo.png',
+        url: 'https://chatcoco.app/opengraph.png',
         width: 800,
         height: 600,
         alt: 'Coco Logo',
@@ -28,8 +28,8 @@ export const metadata = {
     ],
   },
   twitter: {
-    handle: '@cocogg',
-    site: '@cocogg',
+    handle: '@chatcoco',
+    site: '@chatcoco',
     cardType: 'summary_large_image',
   },
 };
@@ -65,6 +65,7 @@ export default function RootLayout({ children }) {
         ))}
       </Head>
       <body>
+        <p className='visually-hidden'>coco est le premier chat gratuit de France : tchater et voir des webcam . le chat sans inscription pour discuter avec des milliers de connectés.</p>
         <SocketProvider>
           <UserProvider>
             <ChatProvider>

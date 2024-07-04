@@ -1,0 +1,31 @@
+/* style={{
+    padding: '8px 8px',
+    backgroundColor: user.gender == 'man' ? 'rgba(0, 0, 255, 0.1)' : 'rgba(255, 0, 0, 0.1)',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+    marginTop: '16px'
+}} */
+
+.userItem {
+    display: flex;
+    align-items: center;
+    padding: 8px 4px;
+    border: 1px solid #ddd!important;
+    border-radius: 4px;
+    margin-top: 12px;
+    cursor: pointer;
+    background-color: #fff;
+}
+
+.userItem:hover {
+    opacity: 0.8;
+    border: 1px solid #1890ff!important;
+}
+
+.userItemMan {
+    background-color: #e6f7ff;
+}
+
+.userItemWoman {
+    background-color: rgba(253, 138, 228, 0.1);
+}

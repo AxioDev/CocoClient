@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Modal, Input, Button } from 'antd';
+import { Menu, Modal, Input, Button, Skeleton } from 'antd';
 import { PlusOutlined, AppstoreOutlined, TeamOutlined } from '@ant-design/icons';
 import { useSocket } from '@/contexts/SocketContext';
 
 const RoomsList = ({ onRoomClick }) => {
-
     const socket = useSocket();
     const [rooms, setRooms] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [newRoomName, setNewRoomName] = useState('');
 
     useEffect(() => {
         socket.emit('getRooms');
 
-        socket.on('roomsList', (rooms) => {
+        socket.on('getRooms', (rooms) => {
             setRooms(rooms);
+            setIsLoading(false);
         });
 
         socket.on('roomCreated', (room) => {
@@ -26,7 +27,7 @@ const RoomsList = ({ onRoomClick }) => {
         });
 
         return () => {
-            socket.off('roomsList');
+            socket.off('getRooms');
             socket.off('roomCreated');
             socket.off('roomDeleted');
         };
@@ -53,24 +54,34 @@ const RoomsList = ({ onRoomClick }) => {
                 defaultOpenKeys={['public-rooms', 'private-rooms']}
             >
                 <Menu.SubMenu key="public-rooms" icon={<AppstoreOutlined />} title="Salons publics">
-                    {publicRooms.map(room => (
-                        <Menu.Item key={room._id} onClick={() => handleRoomClick(room)} style={{ height: 25, lineHeight: '25px' }}>
-                            {room.name}
-                        </Menu.Item>
-                    ))}
+                    {isLoading ? (
+                        <Skeleton active />
+                    ) : (
+                        publicRooms.map(room => (
+                            <Menu.Item key={room._id} onClick={() => handleRoomClick(room)} style={{ height: 25, lineHeight: '25px' }}>
+                                {room.name}
+                            </Menu.Item>
+                        ))
+                    )}
                 </Menu.SubMenu>
 
                 <Menu.SubMenu key="private-rooms" icon={<TeamOutlined />} title="Salons privés">
-                    {privateRooms.map(room => (
-                        <Menu.Item key={room._id} onClick={() => handleRoomClick(room)} style={{ height: 25, lineHeight: '25px' }}>
-                            {room.name}
-                        </Menu.Item>
-                    ))}
-                    <Menu.Item key="create-room">
-                        <Button type="link" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
-                            Créer un salon privé
-                        </Button>
-                    </Menu.Item>
+                    {isLoading ? (
+                        <Skeleton active />
+                    ) : (
+                        <>
+                            {privateRooms.map(room => (
+                                <Menu.Item key={room._id} onClick={() => handleRoomClick(room)} style={{ height: 25, lineHeight: '25px' }}>
+                                    {room.name}
+                                </Menu.Item>
+                            ))}
+                            <Menu.Item key="create-room">
+                                <Button type="link" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
+                                    Créer un salon privé
+                                </Button>
+                            </Menu.Item>
+                        </>
+                    )}
                 </Menu.SubMenu>
             </Menu>
             <Modal
