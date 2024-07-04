@@ -1,20 +1,24 @@
+// components/RoomChat.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Input, Button, List, Typography, Col, Row, Avatar, Upload, message, Form, Layout, Image, Tag, Space } from 'antd';
 import { UploadOutlined, UserOutlined, UpOutlined, DownOutlined, EyeOutlined, SendOutlined } from '@ant-design/icons';
 import { useUser } from '@/contexts/UserContext';
+import { useChat } from '@/contexts/ChatContext';
 import { uploadFile } from '../api/upload';
 import { useSocket } from '@/contexts/SocketContext';
 import Styles from '@/styles/roomChat.module.css';
 import { useMediaQuery } from 'react-responsive';
+import useChatTabs from '@/hooks/useChatTabs';
 
 const { Content } = Layout;
 const { TextArea } = Input;
 
 const RoomChat = ({ room }) => {
     const socket = useSocket();
+    const { user } = useUser();
+    const { openPrivateChat } = useChatTabs();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const { user } = useUser();
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
     const [users, setUsers] = useState([]);
@@ -124,11 +128,15 @@ const RoomChat = ({ room }) => {
 
     const canSendMessage = () => {
         return newMessage.trim();
-    }
+    };
 
     const handleCollapseUsersList = () => {
         setUsersListCollapsed(!usersListCollapsed);
-    }
+    };
+
+    const handleRoomUserClick = (user) => {
+        openPrivateChat(user, user);
+    };
 
     return (
         <>
@@ -203,7 +211,7 @@ const RoomChat = ({ room }) => {
                                     style={{ padding: '0px 8px', paddingBottom: '8px' }}
                                     dataSource={users}
                                     renderItem={(item) => (
-                                        <List.Item className={`${Styles.userItem} ${user.gender == 'man' ? Styles.userItemMan : Styles.userItemWoman}`}>
+                                        <List.Item className={`${Styles.userItem} ${user.gender == 'man' ? Styles.userItemMan : Styles.userItemWoman}`} onClick={() => handleRoomUserClick(item)}>
                                             <strong>{item.nickname}</strong>
                                             <span>{item.age}</span>
                                             <em>{item.city.name}</em>
@@ -222,9 +230,9 @@ const RoomChat = ({ room }) => {
                                 onClick={handleCollapseUsersList}>
                                 {!usersListCollapsed ? <DownOutlined /> :
                                     <UpOutlined />}
-                                    <span>
-                                        Voir les utilisateurs
-                                    </span>
+                                <span>
+                                    Voir les utilisateurs
+                                </span>
                             </div> : null}
                         </Col>
                     </Row>
@@ -237,7 +245,6 @@ const RoomChat = ({ room }) => {
                         <Upload {...uploadProps} showUploadList={false}>
                             <Button icon={<UploadOutlined />} />
                         </Upload>
-                        {/* <Button icon={<CameraOutlined />} onClick={() => message.info('Cette fonctionnalité n\'est pas encore disponible')} /> */}
                         <Input
                             size='large'
                             value={newMessage}
@@ -250,8 +257,6 @@ const RoomChat = ({ room }) => {
                         <Button type="primary" onClick={() => handleSendMessage()} disabled={!canSendMessage()} icon={<SendOutlined />} />
                     </Space.Compact>
                 </Space>
-
-
             </div>
         </>
     );
