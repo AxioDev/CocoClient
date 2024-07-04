@@ -2,7 +2,6 @@
 import path from 'path';
 
 const nextConfig = {
-    output: 'export',
     reactStrictMode: false,
     webpack(config) {
         config.module.rules.push({
