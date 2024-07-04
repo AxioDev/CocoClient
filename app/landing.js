@@ -22,12 +22,12 @@ export default function LandingPage() {
                 <Col xs={22} sm={16} md={12} lg={8} >
                     <div style={{ textAlign: 'center', marginBottom: '20px' }}>
 
-                        <h1 className="visually-hidden">Coco (anciennement coco.fr, coco.gg) - Chat en Ligne sans inscription Populaire en France</h1>
+                        <h1 className="visually-hidden">Coco (anciennement coco.fr, coco.gg) - Premier Chat Gratuit en France – Tchat et Webcam sans Inscription</h1>
 
                         <Logo width={300} height={120} />
 
                         <p className={styles.baseLine}>
-                            Le chat <strong>sans inscription</strong>, pour discuter en toute <strong>liberté</strong> !
+                            Découvrez <strong>Coco</strong>, le <strong>premier chat gratuit en France</strong>. <strong>Tchatez</strong> en direct et profitez de <strong>webcams sans inscription</strong> pour discuter avec des milliers d'internautes connectés.
                         </p>
 
                     </div>

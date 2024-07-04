@@ -1,32 +1,42 @@
 .page {
     overflow-y: auto;
-
+    background-color: #f0f2f5;
 }
 
 .loginSection {
-    position: relative; /* Ensure the pseudo-element is positioned relative to the .loginSection */
+    position: relative;
+    /* Ensure the pseudo-element is positioned relative to the .loginSection */
     height: 100vh;
     padding: 40px 0;
-    background: #f0f2f5;
-    overflow: hidden; /* Prevent content from spilling out of the section */
+    background: 
+    url('../public/food.png') repeat,
+    linear-gradient(0deg, #D9AFD9 0%, #97D9E1 100%);
+
+    overflow: hidden;
+    /* Prevent content from spilling out of the section */
 }
 
 .loginSection::before {
+    
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('/coconut-1501334_1920.jpg');
-    background-size: cover; /* Ensure the background covers the entire area */
-    background-position: center; /* Center the background image */
-    filter: blur(10px); /* Apply the blur effect */
+
+
+    background-size: auto;
+    /* Ensure the background covers the entire area */
+    background-position: center;
+    /* Center the background image */
+    filter: blur(10px);
+    /* Apply the blur effect */
     opacity: 0.2;
 }
 
 
 
 .baseLine {
-
+    padding: 0 1em;
 }
