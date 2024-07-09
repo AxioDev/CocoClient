@@ -167,7 +167,7 @@ const PrivateChat = forwardRef(({ recipient, initialMessages }, ref) => {
                                 actions={[
                                     <UserAddOutlined key="add-friend" onClick={() => message.info('Ajouter en ami: Cette fonctionnalité n\'est pas encore disponible')} />,
                                     <InfoCircleOutlined key="info" onClick={() => message.info('Info: Cette fonctionnalité n\'est pas encore disponible')} />,
-                                    <EllipsisOutlined key="ellipsis" onClick={() => message.info('Actions: Cette fonctionnalité n\'est pas encore disponible')} />,
+                                    <EllipsisOutlined key="ellipsis" onClick={() => message.info('Elipsis:Cette fonctionnalité n\'est pas encore disponible')} />,
                                 ]}
 
                                 cover={<img alt={`image de profil de ${recipient.nickname}`} src={recipient.avatarUrl || getDefaultAvatarUrl()} />}

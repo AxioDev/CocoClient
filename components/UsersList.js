@@ -6,15 +6,17 @@ import { useSocket } from '../contexts/SocketContext';
 import { useUser } from '../contexts/UserContext';
 import { useChat } from '../contexts/ChatContext';
 import Styles from '@/styles/usersList.module.css';
+import useChatTabs from '@/hooks/useChatTabs';
 
 const initialFilters = {
     gender: 'all',
     age: 'all'
 };
 
-const UsersList = ({ onUserClick }) => {
+const UsersList = ({  }) => {
     const socket = useSocket();
-    const { state, dispatch } = useChat();
+    const { openPrivateChat } = useChatTabs();
+    const { dispatch } = useChat();
     const { user } = useUser();
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
@@ -52,7 +54,7 @@ const UsersList = ({ onUserClick }) => {
             socket.off('getOnlineUsers', handleOnlineUsers);
             socket.off('userStatusChange', handleUserStatusChange);
         };
-    }, [dispatch, socket]);
+    }, [socket]);
 
     const applyFilters = (users) => {
         let newFilteredUsers = users;
@@ -108,6 +110,19 @@ const UsersList = ({ onUserClick }) => {
         return city;
     };
 
+    const getAvatarIcon = (user) => {
+
+        if (user.user.avatarUrl) {
+            return <Avatar size="large" src={user.user.avatarUrl} />;
+        }
+
+        return user.user.gender == 'man' ? <ManOutlined /> : <WomanOutlined />;
+    }
+
+    const handleUserClick = (onlineUser) => {
+        openPrivateChat(user, onlineUser);
+    };
+
     if (!user || !socket) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -160,13 +175,16 @@ const UsersList = ({ onUserClick }) => {
                             <List.Item
                                 key={index}
                                 className={`${Styles.onlineUser} ${user.user.gender === 'man' ? Styles.onlineUserGenderMan : Styles.onlineUserGenderWoman}`}
-                                onClick={() => onUserClick(user.user)}
+                                onClick={() => handleUserClick(user.user)}
                             >
                                 <List.Item.Meta
                                     className={Styles.onlineUserMeta}
                                     avatar={
                                         <Badge status={user.status === 'online' ? 'success' : 'default'}>
-                                            <Avatar size="large" icon={user.user.gender == 'man' ? <ManOutlined /> : <WomanOutlined />} />
+                                            <Avatar 
+                                                size="large" 
+                                                icon={getAvatarIcon(user)} 
+                                            />
                                         </Badge>
                                     }
                                     title={

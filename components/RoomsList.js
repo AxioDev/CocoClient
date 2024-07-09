@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Menu, Modal, Input, Button, Skeleton } from 'antd';
 import { PlusOutlined, AppstoreOutlined, TeamOutlined } from '@ant-design/icons';
 import { useSocket } from '@/contexts/SocketContext';
+import useChatTabs from '@/hooks/useChatTabs';
 
-const RoomsList = ({ onRoomClick }) => {
+const RoomsList = ({ }) => {
     const socket = useSocket();
+    const { openRoomChat } = useChatTabs();
     const [rooms, setRooms] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -34,7 +36,7 @@ const RoomsList = ({ onRoomClick }) => {
     }, [socket]);
 
     const handleRoomClick = (room) => {
-        onRoomClick(room);
+        openRoomChat(room);
     };
 
     const handleCreateRoom = () => {

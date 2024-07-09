@@ -32,6 +32,7 @@ export const metadata = {
     site: '@chatcoco',
     cardType: 'summary_large_image',
   },
+  manifest : "/manifest.json",
 };
 
 export default function RootLayout({ children }) {

@@ -1,7 +1,7 @@
 import Styles from '@/styles/logo.module.css';
 
 const Logo = ({ width, height }) => (
-  <div>
+  <div className={Styles.gradientContainer}>
 
     <svg
       version="1.1"

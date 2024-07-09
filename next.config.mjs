@@ -1,5 +1,5 @@
-// next.config.mjs
 import path from 'path';
+import withPWA from '@ducanh2912/next-pwa';
 
 const nextConfig = {
     reactStrictMode: false,
@@ -15,9 +15,23 @@ const nextConfig = {
                 },
             ],
         });
-
         return config;
     },
 };
 
-export default nextConfig;
+const pwaConfig = withPWA({
+    dest: 'public',
+    cacheOnFrontEndNav: true,
+    aggresiveFrontEndNavCaching: true,
+    reloadOnOnline: true,
+    swcMinify: true,
+    disable: false,
+    workboxOptions: {
+        disableDevLogs: true,
+    },
+});
+
+export default {
+    ...nextConfig,
+    ...pwaConfig,
+};

@@ -1,19 +1,22 @@
-@keyframes gradient-animation {
-    0% {
-        fill: url(#gradient1);
-    }
-
-    50% {
-        fill: url(#gradient2);
-    }
-
-    100% {
-        fill: url(#gradient1);
-    }
-}
-
-.glitter {
-    fill: none;
-    stroke-width: 2;
+.gradientContainer {
+    --current-fill: url(#gradient1);
     animation: gradient-animation 5s infinite;
-}
+  }
+  
+  @keyframes gradient-animation {
+    0% {
+      --current-fill: url(#gradient1);
+    }
+    50% {
+      --current-fill: url(#gradient2);
+    }
+    100% {
+      --current-fill: url(#gradient1);
+    }
+  }
+  
+  .glitter {
+    fill: var(--current-fill);
+    stroke-width: 2;
+  }
+  
