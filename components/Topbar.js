@@ -20,16 +20,6 @@ export default function Topbar({ user, onItemClick }) {
             overflowedIndicator={<DownOutlined />}
             items={[
                 {
-                    key: 'update_profile',
-                    label: <>
-                        <Button type="link">
-                            <EditOutlined />
-                            Modifier mon profil
-                        </Button>
-                    </>,
-                    href: '/'
-                },
-                {
                     key: '1',
                     label: (
                         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -38,7 +28,20 @@ export default function Topbar({ user, onItemClick }) {
                                 {user.nickname || 'Inconnu'}
                             </span>
                         </div>
-                    )
+                    ),
+                    children: [
+                        {
+                            key: 'update_profile',
+                            label: 'Modifier mon profil',
+                            href: '/'
+                        },
+                        {
+                            danger: true,
+                            key: 'logout',
+                            label: 'Déconnexion',
+                            href: '/'
+                        }
+                    ]
                 }
             ]}
         />

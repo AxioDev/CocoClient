@@ -3,6 +3,7 @@ import { Menu, Modal, Input, Button, Skeleton } from 'antd';
 import { PlusOutlined, AppstoreOutlined, TeamOutlined } from '@ant-design/icons';
 import { useSocket } from '@/contexts/SocketContext';
 import useChatTabs from '@/hooks/useChatTabs';
+import Styles from '@/styles/roomsList.module.css';
 
 const RoomsList = ({ }) => {
     const socket = useSocket();
@@ -51,11 +52,12 @@ const RoomsList = ({ }) => {
     return (
         <>
             <Menu 
-                mode="inline" 
+                mode="inline"
+                className={Styles.roomsList}
                 style={{ height: 'calc(100vh - 64px)', overflowY: 'auto', background: '#f0f2f5' }}
                 defaultOpenKeys={['public-rooms', 'private-rooms']}
             >
-                <Menu.SubMenu key="public-rooms" icon={<AppstoreOutlined />} title="Salons publics">
+                <Menu.SubMenu key="public-rooms" icon={<AppstoreOutlined />} title="Salons publics" className={Styles.roomsCategory}>
                     {isLoading ? (
                         <Skeleton active />
                     ) : (
@@ -67,7 +69,7 @@ const RoomsList = ({ }) => {
                     )}
                 </Menu.SubMenu>
 
-                <Menu.SubMenu key="private-rooms" icon={<TeamOutlined />} title="Salons privés">
+                <Menu.SubMenu key="private-rooms" icon={<TeamOutlined />} title="Salons privés" className={Styles.roomsCategory}>
                     {isLoading ? (
                         <Skeleton active />
                     ) : (

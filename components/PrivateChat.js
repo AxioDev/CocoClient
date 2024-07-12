@@ -5,6 +5,8 @@ import { useUser } from '../contexts/UserContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { uploadFile } from '../api/upload';
 import { EditOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
+import Peer from 'simple-peer';
+import { io } from 'socket.io-client';
 
 const { TextArea } = Input;
 const { Content } = Layout;
@@ -18,6 +20,10 @@ const PrivateChat = forwardRef(({ recipient, initialMessages }, ref) => {
     const { user } = useUser();
     const messagesEndRef = useRef(null);
     const typingTimeoutRef = useRef(null);
+    const localVideoRef = useRef(null);
+    const remoteVideoRef = useRef(null);
+    const [stream, setStream] = useState(null);
+    const [peer, setPeer] = useState(null);
 
     const handleSendMessage = async (fileUrl = null) => {
         socket.emit('privateMessage', { senderId: user._id, receiverId: recipient._id, message: newMessage, file: fileUrl });
@@ -54,6 +60,34 @@ const PrivateChat = forwardRef(({ recipient, initialMessages }, ref) => {
 
     useEffect(() => {
 
+        const handleOffer = ({ signalData, from }) => {
+            const newPeer = new Peer({
+                initiator: false,
+                trickle: false,
+                stream: stream
+            });
+
+            newPeer.signal(signalData);
+
+            newPeer.on('signal', data => {
+                socket.emit('videoAnswer', { signalData: data, to: from._id });
+            });
+
+            newPeer.on('stream', stream => {
+                if (remoteVideoRef.current) {
+                    remoteVideoRef.current.srcObject = stream;
+
+                }
+            });
+
+            newPeer.on('error', error => {
+                console.error('handleOffer(): ', error);
+                message.error("Une erreur est survenue lors de la réception de l'offre: " + error);
+            });
+
+            setPeer(newPeer);
+        };
+
         const handleUserTyping = ({ user }) => {
             if (!typingUsers.includes(user._id)) {
                 setTypingUsers(prevUsers => [...prevUsers, user]);
@@ -68,10 +102,12 @@ const PrivateChat = forwardRef(({ recipient, initialMessages }, ref) => {
             setTypingUsers(prevUsers => prevUsers.filter(user => user._id !== user._id));
         };
 
+        socket.on('videoOffer', handleOffer);
         socket.on('typing', handleUserTyping);
         socket.on('stopTyping', handleUserStopTyping);
 
         return () => {
+            socket.off('videoOffer', handleOffer);
             socket.off('typing', handleUserTyping);
             socket.off('stopTyping', handleUserStopTyping);
         };
@@ -119,9 +155,54 @@ const PrivateChat = forwardRef(({ recipient, initialMessages }, ref) => {
         return recipient.gender == 'man' ? '/avatar-man.webp' : '/avatar.webp';
     }
 
+    const startCamera = () => {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                setStream(stream);
+
+                const newPeer = new Peer({
+                    initiator: true,
+                    trickle: false,
+                    stream: stream
+                });
+
+                if (localVideoRef.current) {
+                    localVideoRef.current.srcObject = stream;
+                    localVideoRef.current.play();
+                }
+
+                newPeer.on('signal', data => {
+                    socket.emit('videoOffer', { signalData: data, to: recipient._id });
+                });
+
+                newPeer.on('stream', stream => {
+                    if (remoteVideoRef.current) {
+                        remoteVideoRef.current.srcObject = stream;
+                    }
+                });
+
+                newPeer.on('error', error => {
+                    console.error("startCamera(): ", error);
+                    message.error("Une erreur est survenue lors de la connexion à la caméra: " + error);
+                });
+
+                setPeer(newPeer);
+            })
+            .catch(error => {
+                console.error('Error accessing camera:', error);
+                message.error(`Vous devez autoriser l'accès à la caméra pour démarrer la conversation vidéo`);
+            });
+    }
+
     return (
         <>
+
+            <div style={{ padding: '10px', position: 'absolute', top: 0, width: '100%', background: '#f1f1f1' }}>
+                <video id="localVideo" ref={localVideoRef} style={{ width: '100%', maxHeight: '300px' }} autoPlay muted></video>
+                <video id="remoteVideo" ref={remoteVideoRef} style={{ width: '100%', maxHeight: '300px' }} autoPlay></video>
+            </div>
             <div style={{ overflowY: 'auto', position: 'relative', flexGrow: 1 }}>
+
 
                 <Content style={{ padding: '10px', overflowY: 'auto', position: 'relative', flexGrow: 1 }}>
                     <Row>
@@ -139,7 +220,7 @@ const PrivateChat = forwardRef(({ recipient, initialMessages }, ref) => {
                                         maxWidth: '80%',
                                         wordBreak: 'break-word',
                                     }}>
-                                        <strong style={{ color: message.sender === 'Me' ? 'green' : 'black' }}>
+                                        <strong style={{ color: 'green' }}>
                                             {message.sender?.nickname}:&nbsp;
                                         </strong>
                                         {message.content && (
@@ -167,7 +248,7 @@ const PrivateChat = forwardRef(({ recipient, initialMessages }, ref) => {
                                 actions={[
                                     <UserAddOutlined key="add-friend" onClick={() => message.info('Ajouter en ami: Cette fonctionnalité n\'est pas encore disponible')} />,
                                     <InfoCircleOutlined key="info" onClick={() => message.info('Info: Cette fonctionnalité n\'est pas encore disponible')} />,
-                                    <EllipsisOutlined key="ellipsis" onClick={() => message.info('Elipsis:Cette fonctionnalité n\'est pas encore disponible')} />,
+                                    <CameraOutlined key="ellipsis" onClick={startCamera} />,
                                 ]}
 
                                 cover={<img alt={`image de profil de ${recipient.nickname}`} src={recipient.avatarUrl || getDefaultAvatarUrl()} />}
@@ -188,7 +269,7 @@ const PrivateChat = forwardRef(({ recipient, initialMessages }, ref) => {
                                         </Space>
                                     </>}
                                 />
-                                
+
                                 {recipient.bio && (
                                     <div>
                                         <Divider />
@@ -201,6 +282,9 @@ const PrivateChat = forwardRef(({ recipient, initialMessages }, ref) => {
                 </Content>
                 <div ref={messagesEndRef} />
             </div>
+
+
+
             <div style={{ padding: '10px 0 10px 10px', position: 'absolute', bottom: 0, width: '100%', background: '#f1f1f1' }}>
 
                 <Space direction="vertical" size="middle" style={{ width: '100%' }}>

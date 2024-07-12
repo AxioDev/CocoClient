@@ -24,7 +24,7 @@ const { Header, Sider, Content } = Layout;
 const Chat = () => {
     const socket = useSocket();
     const { state, dispatch } = useChat();
-    const { user } = useUser();
+    const { user, logout } = useUser();
     const router = useRouter();
     const [collapsedLeft, setCollapsedLeft] = useState(false);
     const [collapsedRight, setCollapsedRight] = useState(false);
@@ -181,6 +181,8 @@ const Chat = () => {
         console.log('Top bar item click:', key);
         if (key === 'update_profile') {
             setModalProfileVisible(true);
+        } else if (key === 'logout') {
+            logout();
         }
     }
 
